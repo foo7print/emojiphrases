@@ -42,5 +42,6 @@ fun Application.module(testing: Boolean = false) {
 
   routing {
     home()
+    about()
   }
 }
