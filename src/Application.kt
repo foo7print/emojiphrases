@@ -67,6 +67,7 @@ fun Application.module(testing: Boolean = false) {
   routing {
     home()
     about()
+    phrases(db)
 
     // API
     phrase(db)
