@@ -34,10 +34,12 @@ import com.raywenderlich.api.phrase
 import com.raywenderlich.repository.InMemoryRepository
 import com.raywenderlich.webapp.*
 import com.ryanharter.ktor.moshi.moshi
+import freemarker.cache.*
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.features.StatusPages
+import io.ktor.freemarker.FreeMarker
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respondText
@@ -60,6 +62,10 @@ fun Application.module(testing: Boolean = false) {
 
   install(ContentNegotiation) {
     moshi()
+  }
+
+  install(FreeMarker) {
+    templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
   }
 
   val db = InMemoryRepository()
