@@ -2,29 +2,33 @@ package com.raywenderlich.webapp
 
 import com.raywenderlich.model.EmojiPhrase
 import com.raywenderlich.model.User
+import com.raywenderlich.redirect
 import com.raywenderlich.repository.Repository
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.auth.authentication
 import io.ktor.freemarker.FreeMarkerContent
+import io.ktor.locations.Location
+import io.ktor.locations.get
+import io.ktor.locations.post
 import io.ktor.request.receiveParameters
 import io.ktor.response.respond
-import io.ktor.response.respondRedirect
 import io.ktor.routing.Route
-import io.ktor.routing.get
-import io.ktor.routing.post
 
 const val PHRASES = "/phrases"
 
+@Location(PHRASES)
+class Phrases
+
 fun Route.phrases(db: Repository) {
     authenticate("auth") {
-        get(PHRASES) {
+        get<Phrases> {
             val user = call.authentication.principal as User
             val phrases = db.phrases()
             call.respond(FreeMarkerContent("phrases.ftl", mapOf("phrases" to phrases,
                 "displayName" to user.displayName)))
         }
-        post(PHRASES) {
+        post<Phrases> {
             val params = call.receiveParameters()
             val action = params["action"] ?: throw IllegalArgumentException("Missing parameter: action")
             when (action) {
@@ -38,7 +42,7 @@ fun Route.phrases(db: Repository) {
                     db.add(EmojiPhrase(emoji, phrase))
                 }
             }
-            call.respondRedirect(PHRASES)
+            call.redirect(Phrases())
         }
     }
 }
