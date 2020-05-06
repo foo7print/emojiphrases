@@ -32,7 +32,8 @@ package com.raywenderlich
 
 import com.raywenderlich.api.phrase
 import com.raywenderlich.model.User
-import com.raywenderlich.repository.InMemoryRepository
+import com.raywenderlich.repository.DatabaseFactory
+import com.raywenderlich.repository.EmojiPhrasesRepository
 import com.raywenderlich.webapp.*
 import com.ryanharter.ktor.moshi.moshi
 import freemarker.cache.ClassTemplateLoader
@@ -87,7 +88,9 @@ fun Application.module(testing: Boolean = false) {
 
   install(Locations)
 
-  val db = InMemoryRepository()
+  DatabaseFactory.init()
+
+  val db = EmojiPhrasesRepository()
 
   routing {
     static("/static") {
