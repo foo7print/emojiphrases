@@ -77,16 +77,9 @@ fun Application.module(testing: Boolean = false) {
     templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
   }
 
-  install(Authentication) {
-    basic(name = "auth") {
-      realm = "Ktor server"
-      validate { credentials ->
-        if (credentials.password == "${credentials.name}123") User(credentials.name) else null
-      }
-    }
-  }
-
   install(Locations)
+
+  val hashFunction = { s: String -> hash(s) }
 
   DatabaseFactory.init()
 
@@ -99,6 +92,9 @@ fun Application.module(testing: Boolean = false) {
     home()
     about()
     phrases(db)
+    signin(db, hashFunction)
+    signout()
+    signup(db, hashFunction)
 
     // API
     phrase(db)

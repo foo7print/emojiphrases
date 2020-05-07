@@ -1,13 +1,13 @@
 package com.raywenderlich.repository
 
-import com.raywenderlich.model.*
+import com.raywenderlich.model.EmojiPhrases
+import com.raywenderlich.model.Users
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object DatabaseFactory {
@@ -16,22 +16,14 @@ object DatabaseFactory {
 
         transaction {
             SchemaUtils.create(EmojiPhrases)
-
-            EmojiPhrases.insert {
-                it[emoji] = "e1"
-                it[phrase] = "p1"
-            }
-            EmojiPhrases.insert {
-                it[emoji] = "e2"
-                it[phrase] = "p2"
-            }
+            SchemaUtils.create(Users)
         }
     }
 
     private fun hikari(): HikariDataSource {
         val config = HikariConfig()
-        config.driverClassName = "org.h2.Driver"
-        config.jdbcUrl = "jdbc:h2:mem:test"
+        config.driverClassName = "org.postgresql.Driver"
+        config.jdbcUrl = System.getenv("JDBC_DATABASE_URL")
         config.maximumPoolSize = 3
         config.isAutoCommit = false
         config.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
