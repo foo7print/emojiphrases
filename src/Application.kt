@@ -31,25 +31,24 @@
 package com.raywenderlich
 
 import com.raywenderlich.api.login
-import com.raywenderlich.api.phrase
+import com.raywenderlich.api.phrasesApi
 import com.raywenderlich.model.EPSession
 import com.raywenderlich.model.User
 import com.raywenderlich.repository.DatabaseFactory
 import com.raywenderlich.repository.EmojiPhrasesRepository
 import com.raywenderlich.webapp.*
-import com.ryanharter.ktor.moshi.moshi
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.Authentication
-import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.features.StatusPages
 import io.ktor.freemarker.FreeMarker
+import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -85,7 +84,7 @@ fun Application.module(testing: Boolean = false) {
   }
 
   install(ContentNegotiation) {
-    moshi()
+    gson()
   }
 
   install(FreeMarker) {
@@ -135,7 +134,7 @@ fun Application.module(testing: Boolean = false) {
 
     // API
     login(db, jwtService)
-    phrase(db)
+    phrasesApi(db)
   }
 }
 
