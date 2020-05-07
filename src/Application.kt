@@ -30,6 +30,7 @@
 
 package com.raywenderlich
 
+import com.raywenderlich.api.login
 import com.raywenderlich.api.phrase
 import com.raywenderlich.model.EPSession
 import com.raywenderlich.model.User
@@ -38,9 +39,13 @@ import com.raywenderlich.repository.EmojiPhrasesRepository
 import com.raywenderlich.webapp.*
 import com.ryanharter.ktor.moshi.moshi
 import freemarker.cache.ClassTemplateLoader
-import io.ktor.application.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationCall
+import io.ktor.application.call
+import io.ktor.application.install
 import io.ktor.auth.Authentication
-import io.ktor.auth.basic
+import io.ktor.auth.authentication
+import io.ktor.auth.jwt.jwt
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.features.StatusPages
@@ -56,7 +61,8 @@ import io.ktor.request.header
 import io.ktor.request.host
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
-import io.ktor.routing.*
+import io.ktor.routing.Routing
+import io.ktor.routing.routing
 import io.ktor.sessions.SessionTransportTransformerMessageAuthentication
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
@@ -99,6 +105,21 @@ fun Application.module(testing: Boolean = false) {
   DatabaseFactory.init()
 
   val db = EmojiPhrasesRepository()
+  val jwtService = JwtService()
+
+  install(Authentication) {
+    jwt("jwt") {
+      verifier(jwtService.verifier)
+      realm = "emojiphrases app"
+      validate {
+        val payload = it.payload
+        val claim = payload.getClaim("id")
+        val claimString = claim.asString()
+        val user = db.userById(claimString)
+        user
+      }
+    }
+  }
 
   routing {
     static("/static") {
@@ -113,6 +134,7 @@ fun Application.module(testing: Boolean = false) {
     signup(db, hashFunction)
 
     // API
+    login(db, jwtService)
     phrase(db)
   }
 }
