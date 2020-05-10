@@ -1,9 +1,10 @@
 package com.raywenderlich.repository
 
-import com.raywenderlich.model.*
+import com.raywenderlich.model.EmojiPhrase
+import com.raywenderlich.model.User
 
 interface Repository {
-    suspend fun add(userId: String, emojiValue: String, phraseValue: String)
+    suspend fun add(userId: String, emojiValue: String, phraseValue: String): EmojiPhrase?
     suspend fun phrase(id: Int): EmojiPhrase?
     suspend fun phrase(id: String): EmojiPhrase?
     suspend fun phrases(): List<EmojiPhrase>

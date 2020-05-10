@@ -43,6 +43,7 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.Authentication
+import io.ktor.auth.authentication
 import io.ktor.auth.jwt.jwt
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
@@ -60,7 +61,6 @@ import io.ktor.request.header
 import io.ktor.request.host
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
-import io.ktor.routing.Routing
 import io.ktor.routing.routing
 import io.ktor.sessions.SessionTransportTransformerMessageAuthentication
 import io.ktor.sessions.Sessions
@@ -144,9 +144,13 @@ suspend fun ApplicationCall.redirect(location: Any) {
   respondRedirect(application.locations.href(location))
 }
 
+fun ApplicationCall.verifyCode(date: Long, user: User, code: String, hashFunction: (String) -> String) =
+  securityCode(date, user, hashFunction) == code
+          && (System.currentTimeMillis() - date).let { it > 0 && it < TimeUnit.MILLISECONDS.convert(2, TimeUnit.HOURS) }
+
+fun ApplicationCall.securityCode(date: Long, user: User, hashFunction: (String) -> String) =
+  hashFunction("$date:${user.userId}:${request.host()}:${refererHost()}")
+
 fun ApplicationCall.refererHost() = request.header(HttpHeaders.Referrer)?.let { URI.create(it).host }
 
-fun ApplicationCall.securityCode(date: Long, user: User, hashFunction: (String) -> String) = hashFunction("$date:${user.userId}:${request.host()}:${refererHost()}")
-
-fun ApplicationCall.verifyCode(date: Long, user: User, code: String, hashFunction: (String) -> String) = securityCode(date, user, hashFunction) == code &&
-        (System.currentTimeMillis() - date).let { it > 0 && it < TimeUnit.MILLISECONDS.convert(2, TimeUnit.HOURS) }
+val ApplicationCall.apiUser get() = authentication.principal<User>()

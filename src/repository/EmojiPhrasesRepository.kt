@@ -1,20 +1,28 @@
 package com.raywenderlich.repository
 
-import com.raywenderlich.model.*
+import com.raywenderlich.model.EmojiPhrase
+import com.raywenderlich.model.EmojiPhrases
+import com.raywenderlich.model.User
+import com.raywenderlich.model.Users
 import com.raywenderlich.repository.DatabaseFactory.dbQuery
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class EmojiPhrasesRepository : Repository {
-    override suspend fun add(userId: String, emojiValue: String, phraseValue: String) {
-        transaction {
-            EmojiPhrases.insert {
+    override suspend fun add(userId: String, emojiValue: String, phraseValue: String) =
+        dbQuery {
+            val insertStatement = EmojiPhrases.insert {
                 it[user] = userId
                 it[emoji] = emojiValue
                 it[phrase] = phraseValue
             }
+            val result = insertStatement.resultedValues?.get(0)
+            if (result != null) {
+                toEmojiPhrase(result)
+            } else {
+                null
+            }
         }
-    }
 
     override suspend fun phrase(id: Int): EmojiPhrase? = dbQuery {
         EmojiPhrases.select{
