@@ -1,1 +1,1 @@
-web:  ./build/install/emojiphrases-foo7print/bin/emojiphrases-foo7print
+web:  ./build/install/emojiphrases/bin/emojiphrases
